@@ -1,18 +1,39 @@
 ﻿syntax="proto3";
+import "google/protobuf/empty.proto";
 
-option csharp_namespace = "CreditRatingService";
+option csharp_namespace = "GrpcCredit";
 
-package CreditRating;
-
-service CreditRatingCheck {
-  rpc CheckCreditRequest (CreditRequest) returns (CreditReply);
+service CreditRating {
+  rpc CheckCreditRequest (CreditRequest) returns (CreditResponse);
+  rpc GetCreditFee(stream FeeRequest) returns (FeeResponse);
+  rpc GetMaxCreditQuota(google.protobuf.Empty) returns (CreditUserResponse);
 }
 
 message CreditRequest {
-  string customerId = 1;
-  int32 credit = 2;
+  string customerDocument = 1;
+  double creditValue = 2;
 }
 
-message CreditReply {
-  bool isAccepted = 1;
+message CreditResponse {
+  string message = 1;
+  CreditCode code = 2;
+
+  enum CreditCode {
+	  REJECTED = 0;
+	  ACCEPTED = 1;
+  }
+}
+
+message CreditUserResponse {
+	string name = 1;
+	string customerDocument = 2;
+	double creditQuota = 3;
+}
+
+message FeeRequest {
+	double feeValue = 1;
+}
+
+message FeeResponse {
+	double totalFeeValue = 1;
 }

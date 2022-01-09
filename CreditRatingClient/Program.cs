@@ -1,12 +1,32 @@
-﻿using CreditRatingService;
+﻿using CreditRatingClient;
 using Grpc.Net.Client;
+using GrpcCredit;
 
-// In this example we are using INSECURE gRPC because the address starts with (http://) instead of (https://)
-var channel = GrpcChannel.ForAddress("http://localhost:5008");
-var client = new CreditRatingCheck.CreditRatingCheckClient(channel);
-var creditRequest = new CreditRequest { CustomerId = "id0201", Credit = 7000 };
-var reply = await client.CheckCreditRequestAsync(creditRequest);
+var chanel = GrpcChannel.ForAddress("http://localhost:5008");
+var client = new CreditRating.CreditRatingClient(chanel);
 
-Console.WriteLine($"Credit for customer {creditRequest.CustomerId} {(reply.IsAccepted ? "approved" : "rejected")}!");
+#region CheckCreditRequest
+CreditRequest? requestCheck = CreditRatingModelHelper.creditRequest;
+CreditResponse? responseCheck = await client.CheckCreditRequestAsync(requestCheck);
+#endregion CheckCreditRequest
+
+#region GetCreditFee
+List<FeeRequest>? dataFee = CreditRatingModelHelper.feeRequests;
+using var requestFee = client.GetCreditFee();
+
+foreach (var x in dataFee)
+{
+    await requestFee.RequestStream.WriteAsync(x);
+}
+
+await requestFee.RequestStream.CompleteAsync();
+
+FeeResponse? responseFee = await requestFee;
+#endregion GetCreditFee
+
+#region GetMaxCreditQuota
+CreditUserResponse? responseMax = await client.GetMaxCreditQuotaAsync(new Google.Protobuf.WellKnownTypes.Empty());
+#endregion GetMaxCreditQuota
+
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();

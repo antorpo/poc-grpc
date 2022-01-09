@@ -1,0 +1,60 @@
+﻿/*
+	Protobuff is a method of serializing structured data.
+	- You can generate code from it in many languages
+*/
+
+// Use the syntax of the last version of Protobuff
+syntax="proto3";
+
+// Import protobuf Well Known Types
+import "google/protobuf/empty.proto";
+
+// Define the name of the package
+package ExplanationGrpc;
+
+// Define the namespace for gRPC compiled classes, if this options is enabled overrides the package definition
+option csharp_namespace = "GrpcExplanation";
+
+// Define the service
+service Explanation {
+  
+  // public CreditResponse CheckCreditRequest(CreditRequest entity) {} (C# equivalent)
+  rpc CheckCreditRequest (CreditRequest) returns (CreditResponse);
+
+  // public FeeResponse GetCreditFee(IEnumerable<FeeRequest> entities) {} 
+  rpc GetCreditFee(stream FeeRequest) returns (FeeResponse);
+
+  // public CreditUserResponse GetMaxCreditQuota() {}
+  rpc GetMaxCreditQuota(google.protobuf.Empty) returns (CreditUserResponse);
+}
+
+// Define a message type and a list of fields
+message CreditRequest {
+	// The number assigned is used to identify the fields in the message once they are converted into the binary format
+  string customerDocument = 1;
+  double creditValue = 2;
+}
+
+message CreditResponse {
+  string message = 1;
+  CreditCode code = 2;
+
+  enum CreditCode {
+	  REJECTED = 0;
+	  ACCEPTED = 1;
+  }
+}
+
+message CreditUserResponse {
+	string name = 1;
+	string customerDocument = 2;
+	double creditQuota = 3;
+}
+
+message FeeRequest {
+	double feeValue = 1;
+}
+
+message FeeResponse {
+	double totalFeeValue = 1;
+}
